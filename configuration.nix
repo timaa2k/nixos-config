@@ -21,21 +21,20 @@
     #plymouth.enable = true;
     tmpOnTmpfs = true;
   };
- 
-  networking.hostName = "nixos"; # Define your hostname.
-  #networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
-  networking.networkmanager.enable = true;
   
-  #  # Open ports in the firewall.
-  # networking.firewall.allowedTCPPorts = [ ... ];
-  # networking.firewall.allowedUDPPorts = [ ... ];
-  # Or disable the firewall altogether.
-  networking.firewall.enable = false;
+  networking = {
+    hostName = "nixos"; # Define your hostname.
+    wireless.enable = false;  # Enables wireless support via wpa_supplicant.
+    networkmanager.enable = true;
+  
+    firewall.enable = true;
+    # firewall.allowedTCPPorts = [ ... ];
+    # firewall.allowedUDPPorts = [ ... ];
 
-  # Configure network proxy if necessary
-  # networking.proxy.default = "http://user:password@proxy:port/";
-  # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
-  
+    # proxy.default = "http://user:password@proxy:port/";
+    # proxy.noProxy = "127.0.0.1,localhost,internal.domain";
+  }; 
+
   powerManagement.enable = true;
 
   # Select internationalisation properties.
@@ -126,7 +125,7 @@
   # Enable the X11 windowing system.
   services.xserver = {
     enable = true;
-    #autorun = false;
+    autorun = false;
 
     layout = "us";
     #xkbVariant = "mac";
