@@ -11,10 +11,17 @@
     ];
 
   # Use the systemd-boot EFI boot loader.
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = false;
-  boot.kernelParams = [ "applesmc" ];
+  boot = {
+    loader.systemd-boot.enable = true;
+    loader.efi.canTouchEfiVariables = false;
 
+    kernelParams = [ "applesmc" ];
+
+    #After 19.03 milestone for LUKS password dialog.
+    #plymouth.enable = true;
+    tmpOnTmpfs = true;
+  };
+ 
   networking.hostName = "nixos"; # Define your hostname.
   #networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
   networking.networkmanager.enable = true;
@@ -105,14 +112,12 @@
   programs.ssh.startAgent = true;
 
   # List services that you want to enable:
-
-  # Enable the OpenSSH daemon.
-  # services.openssh.enable = true;
-  services.locate.enable = true;
-  services.upower.enable = true;
-  
-  # Enable CUPS to print documents.
-  services.printing.enable = true;
+  services = {
+    locate.enable = true;
+    printing.enable = true;
+    #openssh.enable = true;
+    upower.enable = true;
+  };
 
   # Enable sound.
   sound.enable = true;
@@ -126,6 +131,8 @@
     layout = "us";
     #xkbVariant = "mac";
     xkbOptions = "eurosign:e";
+    autoRepeatDelay = 200;
+    autoRepeatInterval = 25;
 
     libinput.enable = true;
 
@@ -147,37 +154,35 @@
     #    '';
     #};
 
-    displayManager.slim = {
-      enable = true; 
-      defaultUser = "tim";
+    displayManager = {
+      slim.enable = true; 
+      slim.defaultUser = "tim";
+      sessionCommands = ''
+        # Set GTK_PATH so that GTK+ can find the Xfce theme engine.
+        export GTK_PATH=${pkgs.xfce.gtk-xfce-engine}/lib/gtk-2.0
+        # Set GET_DATA_PREFIX so that GTK+ can find the Xfce themes.
+        export GTK_DATA_PREFIX=${config.system.path}
+        # Set GIO_EXTRA_MODULES so that gvfs works.
+        export GIO_EXTRA_MODULES=${pkgs.xfce.gvfs}/lib/gio/modules
+        # Launch xfce settings daemon.
+        ${pkgs.xfce.xfce4settings}/bin/xfsettingsd &
+        # Network Manager Applet.
+        ${pkgs.networkmanagerapplet}/bin/nm-applet &
+        # Screen Locking (time-based & on suspend)
+        ${pkgs.xautolock}/bin/autolock -detectsleep -time 1 \
+        #  -locker "${pkgs.i3lock}/bin/i3lock -c 000070" &
+        ${pkgs.xss-lock}/bin/xss-lock -- ${pkgs.i3lock}/bin/i3lock -c 000070 &
+      '';
+      job.logToJournal = true;
     };
-    displayManager.sessionCommands = ''
-      
-      # Set GTK_PATH so that GTK+ can find the Xfce theme engine.
-      export GTK_PATH=${pkgs.xfce.gtk-xfce-engine}/lib/gtk-2.0
-
-      # Set GET_DATA_PREFIX so that GTK+ can find the Xfce themes.
-      export GTK_DATA_PREFIX=${config.system.path}
-
-      # Set GIO_EXTRA_MODULES so that gvfs works.
-      export GIO_EXTRA_MODULES=${pkgs.xfce.gvfs}/lib/gio/modules
-
-      # Launch xfce settings daemon.
-      ${pkgs.xfce.xfce4settings}/bin/xfsettingsd &
-
-      # Network Manager Applet.
-      ${pkgs.networkmanagerapplet}/bin/nm-applet &
-
-      # Screen Locking (time-based & on suspend)
-      ${pkgs.xautolock}/bin/autolock -detectsleep -time 1 \
-        -locker "${pkgs.i3lock}/bin/i3lock -c 000070" &
-
-      ${pkgs.xss-lock}/bin/xss-lock -- ${pkgs.i3lock}/bin/i3lock -c 000070 &
-    '';
-
-    windowManager.i3.enable = true;
-    windowManager.default = "i3";
-    windowManager.i3.configFile = "/etc/i3.conf";
+    #desktopManager = {
+    #  gnome2.enable = true;
+    #};
+    windowManager = {
+      i3.enable = true;
+      i3.configFile = "/etc/i3.conf";
+      default = "i3";
+    };
   };
   environment.etc."i3.conf".text = pkgs.callPackage ./i3-config.nix {};
 

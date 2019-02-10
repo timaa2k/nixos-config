@@ -1,1 +1,6 @@
 result/
+
+hardware-configuration.nix
+
+#Ignore swap files
+*.swp
