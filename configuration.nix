@@ -12,22 +12,27 @@
 
   # Use the systemd-boot EFI boot loader.
   boot = {
+    #consoleLogLevel = 5;
+    kernelPackages = pkgs.linuxPackages_latest;
+    kernelParams = [
+      "hid_apple.fnmode=1"
+      "hid_apple.iso_layout=0"
+      "hid_apple.swap_opt_cmd=1"
+    ];
     loader.systemd-boot.enable = true;
     loader.efi.canTouchEfiVariables = false;
 
-    kernelParams = [ "applesmc" ];
-
     #After 19.03 milestone for LUKS password dialog.
     #plymouth.enable = true;
-    tmpOnTmpfs = true;
+    #tmpOnTmpfs = true;
   };
   
   networking = {
     hostName = "nixos"; # Define your hostname.
-    wireless.enable = false;  # Enables wireless support via wpa_supplicant.
+    #wireless.enable = true;  # Enables wireless support via wpa_supplicant.
     networkmanager.enable = true;
   
-    firewall.enable = true;
+    firewall.enable = false;
     # firewall.allowedTCPPorts = [ ... ];
     # firewall.allowedUDPPorts = [ ... ];
 
@@ -104,6 +109,9 @@
     xfce.xfconf
   ];
 
+  virtualisation.docker.enable = true;
+  #virtualisation.virtualbox.host.enable = true;
+
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
   # programs.mtr.enable = true;
@@ -112,20 +120,23 @@
 
   # List services that you want to enable:
   services = {
-    locate.enable = true;
+    #locate.enable = true;
     printing.enable = true;
     #openssh.enable = true;
-    upower.enable = true;
+    #upower.enable = true;
   };
 
   # Enable sound.
   sound.enable = true;
   hardware.pulseaudio.enable = true;
 
+  # Enable bluetooth.
+  #hardware.bluetooth.enable = true;
+
   # Enable the X11 windowing system.
   services.xserver = {
     enable = true;
-    autorun = false;
+    #autorun = false;
 
     layout = "us";
     #xkbVariant = "mac";
@@ -135,12 +146,12 @@
 
     libinput.enable = true;
 
-    multitouch = {
-      enable = true;
-      ignorePalm = true;
-      tapButtons = false;
-      invertScroll = true;
-    };
+    #multitouch = {
+    #  enable = true;
+    #  ignorePalm = true;
+    #  tapButtons = false;
+    #  invertScroll = true;
+    #};
 
     #synaptics = {
     #  enable = true;
