@@ -73,6 +73,10 @@
   sound.enable = true;
   hardware.pulseaudio.enable = true;
 
+  programs.ssh = {
+    startAgent = true;
+  };
+
   services = {
 
     logind.extraConfig = "HandlePowerKey=suspend";
