@@ -6,215 +6,109 @@
 
 {
   imports =
-    [ # Include the results of the hardware scan.
+    [
       ./hardware-configuration.nix
+      ./user-configuration.nix
+      "${builtins.fetchTarball https://github.com/rycee/home-manager/archive/release-18.09.tar.gz}/nixos"
     ];
 
-  # Use the systemd-boot EFI boot loader.
   boot = {
-    #consoleLogLevel = 5;
-    kernelPackages = pkgs.linuxPackages_latest;
-    kernelParams = [
-      "hid_apple.fnmode=1"
-      "hid_apple.iso_layout=0"
-      "hid_apple.swap_opt_cmd=1"
-    ];
-    loader.systemd-boot.enable = true;
-    loader.efi.canTouchEfiVariables = false;
-
-    #After 19.03 milestone for LUKS password dialog.
+    kernelPackages = pkgs.linuxPackages_4_19;
+    cleanTmpDir = true;
     #plymouth.enable = true;
-    #tmpOnTmpfs = true;
+    loader = {
+      systemd-boot.enable = true;
+      efi.canTouchEfiVariables = true;
+    };
   };
-  
+
   networking = {
-    hostName = "nixos"; # Define your hostname.
-    #wireless.enable = true;  # Enables wireless support via wpa_supplicant.
+    hostName = "mbp";
     networkmanager.enable = true;
-  
-    firewall.enable = false;
-    # firewall.allowedTCPPorts = [ ... ];
-    # firewall.allowedUDPPorts = [ ... ];
-
-    # proxy.default = "http://user:password@proxy:port/";
-    # proxy.noProxy = "127.0.0.1,localhost,internal.domain";
-  }; 
-
-  powerManagement.enable = true;
-
-  # Select internationalisation properties.
-  i18n = {
-    consoleFont = "Lat2-Terminus16";
-    consoleKeyMap = "us";
-    defaultLocale = "en_US.UTF-8";
   };
 
-  # Set your time zone.
-  time.timeZone = "Europe/Amsterdam";
+  nixpkgs.config = {
+    allowUnfree = true;
+    chromium = {
+      enablePepperFlash = true;
+      enablePepperPDF = true;
+      #enableWideVine = true;
+    };
+  };
 
-  # List packages installed in system profile. To search, run:
-  # $ nix search wget
+  i18n = {
+    # HiDPI Font
+    consoleFont = "latarcyrheb-sun32";
+    consoleUseXkbConfig = true;
+    defaultLocale = "en_US.UTF-8";
+    supportedLocales = [ "en_US.UTF-8/UTF-8" ];
+  };
+
+  time.timeZone = "Europe/Berlin";
+
   environment.systemPackages = with pkgs; [
-    acpid
-    acpitool
-    alacritty
-    bashCompletion
-    coreutils
-    curl
-    file
-    fzf
-    gitAndTools.gitFull
-    gnupg
-    htop
-    lsof
-    neovim
-    mkpasswd
-    mosh
-    openssl
-    powertop
-    psmisc
-    pwgen
-    ranger
-    tmux
-    tree
-    unzip
-    utillinux
-    vim
-    wget 
-    which
-    zip
-
-    chromium
-    i3 i3lock i3status dmenu
-    networkmanagerapplet networkmanager_openvpn
-    slack
-    vlc
-    xdg_utils
-    xfontsel
- 
-    gnome2.gtk gnome2.gnomeicontheme shared_mime_info
-
-    dunst libnotify
-    xautolock
-    xss-lock
-
-    xfce.exo
-    xfce.gtk-xfce-engine
-    xfce.gvfs
-    xfce.terminal
-    xfce.thunar
-    xfce.thunar-volman
-    xfce.xfce4icontheme
-    xfce.xfce4settings
-    xfce.xfconf
+     nix-index
+     nix-prefetch-git nix-prefetch-scripts
+     networkmanager
+     vim
+     gitAndTools.gitFull
+     wget
+     unzip                  # Archives
+     tree                   # Show file hierarchies
+     fzf                    # Fuzzy file finder
+     ag                     # Fast grep replacement
+     bat                    # Cat replacement
+     fd                     # Find replacement
+     gotop                  # Top replacement
+     ncdu                   # Fancy disk usage analyzer
+     chromium               # Another web browser
   ];
 
-  virtualisation.docker.enable = true;
-  #virtualisation.virtualbox.host.enable = true;
-
-  # Some programs need SUID wrappers, can be configured further or are
-  # started in user sessions.
-  # programs.mtr.enable = true;
-  # programs.gnupg.agent = { enable = true; enableSSHSupport = true; };
-  programs.ssh.startAgent = true;
-
-  # List services that you want to enable:
-  services = {
-    #locate.enable = true;
-    printing.enable = true;
-    #openssh.enable = true;
-    #upower.enable = true;
+  environment.variables = {
+    EDITOR = "vim";
+    BROWSER = "chromium";
   };
 
   # Enable sound.
   sound.enable = true;
   hardware.pulseaudio.enable = true;
 
-  # Enable bluetooth.
-  #hardware.bluetooth.enable = true;
+  services = {
 
-  # Enable the X11 windowing system.
-  services.xserver = {
-    enable = true;
-    #autorun = false;
+    logind.extraConfig = "HandlePowerKey=suspend";
 
-    layout = "us";
-    #xkbVariant = "mac";
-    xkbOptions = "eurosign:e";
-    autoRepeatDelay = 200;
-    autoRepeatInterval = 25;
+    printing.enable = true;
 
-    libinput.enable = true;
+    xserver = {
+      enable = true;
+      dpi = 180;
+      libinput.enable = true;
+      layout = "us";
 
-    #multitouch = {
-    #  enable = true;
-    #  ignorePalm = true;
-    #  tapButtons = false;
-    #  invertScroll = true;
-    #};
+      displayManager.sddm = {
+        enable = true;
+        #defaultUser = "tim";
+        #autoLogin = false;
+      };
 
-    #synaptics = {
-    #  enable = true;
-    #  palmDetect = true;
-    #  scrollDelta = 100;
-    #  tapButtons = false;
-    #  twoFingerScroll = true;
-    #  additionalOptions = ''
-    #    Option "Thumbsize" "50"
-    #    '';
-    #};
+      desktopManager.plasma5 = {
+        enable = true;
+      };
 
-    displayManager = {
-      slim.enable = true; 
-      slim.defaultUser = "tim";
-      sessionCommands = ''
-        # Set GTK_PATH so that GTK+ can find the Xfce theme engine.
-        export GTK_PATH=${pkgs.xfce.gtk-xfce-engine}/lib/gtk-2.0
-        # Set GET_DATA_PREFIX so that GTK+ can find the Xfce themes.
-        export GTK_DATA_PREFIX=${config.system.path}
-        # Set GIO_EXTRA_MODULES so that gvfs works.
-        export GIO_EXTRA_MODULES=${pkgs.xfce.gvfs}/lib/gio/modules
-        # Launch xfce settings daemon.
-        ${pkgs.xfce.xfce4settings}/bin/xfsettingsd &
-        # Network Manager Applet.
-        ${pkgs.networkmanagerapplet}/bin/nm-applet &
-        # Screen Locking (time-based & on suspend)
-        ${pkgs.xautolock}/bin/autolock -detectsleep -time 1 \
-        #  -locker "${pkgs.i3lock}/bin/i3lock -c 000070" &
-        ${pkgs.xss-lock}/bin/xss-lock -- ${pkgs.i3lock}/bin/i3lock -c 000070 &
-      '';
-      job.logToJournal = true;
-    };
-    #desktopManager = {
-    #  gnome2.enable = true;
-    #};
-    windowManager = {
-      i3.enable = true;
-      i3.configFile = "/etc/i3.conf";
-      default = "i3";
+      desktopManager.session = [{
+        name = "home-manager";
+        start = ''
+          ${pkgs.stdenv.shell} $HOME/.xsession-hm &
+          waitPID=$!
+        '';
+      }];
     };
   };
-  environment.etc."i3.conf".text = pkgs.callPackage ./i3-config.nix {};
 
-  nixpkgs.config.allowUnfree = true;
-
-  # Users
-  users.mutableUsers = false;
-  
-  users.extraUsers.tim = {
-    isNormalUser = true;
-    home = "/home/tim";
-    description = "Tim Weidner";
-    extraGroups = [ "wheel" "networkmanager" ];
-    hashedPassword = "$6$4RfV2SAFDtKDsBVz$FJnXrf1hiEUMxzKKfw.p0uwNtdXNcVoTDAGB0pkt1/p2Im9c232FzoSPP/NrsQqTMNPoTCjvF6JQsx6IuKCSb0";
-  };
-
+  security.sudo.extraConfig = "Defaults timestamp_timeout=60";
   # This value determines the NixOS release with which your system is to be
   # compatible, in order to avoid breaking some software such as database
   # servers. You should change this only after NixOS release notes say you
   # should.
   system.stateVersion = "18.09"; # Did you read the comment?
-
 }
-
-
