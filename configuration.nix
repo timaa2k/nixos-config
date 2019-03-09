@@ -29,11 +29,6 @@
 
   nixpkgs.config = {
     allowUnfree = true;
-    chromium = {
-      enablePepperFlash = true;
-      enablePepperPDF = true;
-      #enableWideVine = true;
-    };
   };
 
   i18n = {
@@ -47,16 +42,17 @@
   time.timeZone = "Europe/Berlin";
 
   environment.systemPackages = with pkgs; [
+     blueman
+     gitAndTools.gitFull
+     networkmanager
      nix-index
      nix-prefetch-git nix-prefetch-scripts
-     networkmanager
-     gitAndTools.gitFull
      wget
      vim
      unzip                  # Archives
      tree                   # Show file hierarchies
      fzf                    # Fuzzy file finder
-     ag                     # Fast grep replacement
+     ripgrep                # Fast grep replacement
      bat                    # Cat replacement
      fd                     # Find replacement
      gotop                  # Top replacement
