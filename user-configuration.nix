@@ -1,11 +1,6 @@
 { pkgs, ... }:
 
 {
-
-#sha256 = "0g4d1z96pkdfdxgs5w4bkik3p25g6j322vk9m0l9jqc4412f513g";
-#rev = "dd94a849df69fe62fe2cb23a74c2b9330f1189ed";
-#url = https://github.com/rycee/home-manager;
-
   users.mutableUsers = false;
 
   users.extraUsers.tim = {
@@ -18,19 +13,32 @@
 
   home-manager.users.tim = {
 
-    home.packages = [
-      pkgs.i3
-      pkgs.gitAndTools.gitFull
-      pkgs.udisks
-      pkgs.jq
-      pkgs.ranger
-      pkgs.alacritty
-      pkgs.tmux
-      pkgs.zathura
-      pkgs.gnupg
-      pkgs.unzip
-      pkgs.youtube-dl
-      pkgs.flameshot
+    home.sessionVariables = {
+      BROWSER = "chromium";
+      EDITOR = "vim";
+      TERM = "xterm-256color";
+    };
+
+    home.packages = with pkgs; [
+      alacritty
+      chromium
+      flameshot
+      gitAndTools.gitFull
+      gnupg
+      go
+      i3
+      jq
+      python36Full
+      ranger
+      tmux
+      udisks
+      unzip
+      youtube-dl
+      zathura
+      python3Packages.python-language-server
+      python3Packages.pyls-mypy
+      python3Packages.pyls-isort
+      python3Packages.pyls-black
     ];
 
     programs.git = {
@@ -39,6 +47,86 @@
       userName  = "Tim Weidner";
       userEmail = "timaa2k@gmail.com";
     };
+
+    programs.vim = {
+      enable = true;
+      plugins = [
+        "vim-startify"
+        "vim-sensible"
+        "vim-fugitive"
+        "vim-gitgutter"
+        "vim-surround"
+        "vim-colorschemes"
+        "lightline-vim"
+        "vim-multiple-cursors"
+        "vim-eunuch"
+        "vim-polyglot"
+        "fzf-vim"
+        "LanguageClient-neovim"
+        "deoplete-go"
+        "deoplete-jedi"
+      ];
+      extraConfig = ''
+        let g:LanguageClient_serverCommands = {
+        \ 'python': ['pyls']
+        \ }
+        nnoremap <F5> :call LanguageClient_contextMenu()<CR>
+        nnoremap <silent> gh :call LanguageClient_textDocument_hover()<CR>
+        nnoremap <silent> gd :call LanguageClient_textDocument_definition()<CR>
+        nnoremap <silent> gr :call LanguageClient_textDocument_references()<CR>
+        nnoremap <silent> gs :call LanguageClient_textDocument_documentSymbol()<CR>
+        nnoremap <silent> <F2> :call LanguageClient_textDocument_rename()<CR>
+        nnoremap <silent> gf :call LanguageClient_textDocument_formatting()<CR>
+
+        syntax on
+        color smyck
+        highlight Pmenu guibg=white guifg=black gui=bold
+        highlight Comment gui=bold
+        highlight Normal gui=none
+        highlight NonText guibg=none
+
+        set mouse=a
+
+        set splitbelow
+        set splitright
+
+        set termguicolors
+
+        filetype plugin indent on
+        set tabstop=4
+        set softtabstop=4
+        set shiftwidth=4
+        set expandtab
+        set smarttab
+
+        autoindent
+        set incsearch ignorecase smartcase hlsearch
+        set ruler laststatus=2 showcmd showmode
+        set nolist
+        set wrap breakindent
+        set encoding=utf-8
+        set number
+        set title
+
+        let mapleader = "\<Space>"
+        nmap <leader>t :NERDTreeToggle<CR>
+        nmap <leader>b :TagbarToggle<CR>
+        nmap <leader>r :so ~/.config/nvim/init.vim<CR>
+        nmap <leader>s <C-w>s<C-w>j:terminal<CR>
+        nmap <leader>vs <C-w>v<C-w>l:terminal<CR>
+        nmap <leader>f :Files<CR>
+        nmap <silent> <leader><leader> :noh<CR>
+        nmap <Tab> :bnext<CR>
+        nmap <S-Tab> :bprevious<CR>
+
+        nnoremap <leader>- <c-W>s
+        nnoremap <leader>/ <c-W>v
+
+        " Disable .swp already exists warning
+        set shortmess+=A
+      '';
+    };
+    #home.file.".vimrc".source = fetchGitHub
 
     programs.command-not-found.enable = true;
 

@@ -50,9 +50,9 @@
      nix-index
      nix-prefetch-git nix-prefetch-scripts
      networkmanager
-     vim
      gitAndTools.gitFull
      wget
+     vim
      unzip                  # Archives
      tree                   # Show file hierarchies
      fzf                    # Fuzzy file finder
@@ -61,12 +61,10 @@
      fd                     # Find replacement
      gotop                  # Top replacement
      ncdu                   # Fancy disk usage analyzer
-     chromium               # Another web browser
   ];
 
   environment.variables = {
     EDITOR = "vim";
-    BROWSER = "chromium";
   };
 
   # Enable sound.
