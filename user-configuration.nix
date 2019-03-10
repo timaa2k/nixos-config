@@ -1,7 +1,5 @@
 { pkgs, ... }:
 
-with builtins;
-
 {
   users.mutableUsers = false;
 
@@ -55,6 +53,14 @@ with builtins;
       zathura
     ];
 
+    programs.man.enable = true;
+
+    programs.go = {
+      enable = true;
+      goPath = "Code/go";
+      goBin  = "Code/go/bin";
+    };
+
     programs.git = {
       package = pkgs.gitAndTools.gitFull;
       enable = true;
@@ -62,83 +68,90 @@ with builtins;
       userEmail = "timaa2k@gmail.com";
     };
 
-    programs.vim = {
+    programs.neovim = {
       enable = true;
-      plugins = [
-        "vim-startify"
-        "vim-sensible"
-        "vim-fugitive"
-        "vim-gitgutter"
-        "vim-surround"
-        "vim-colorschemes"
-        "lightline-vim"
-        "vim-multiple-cursors"
-        "vim-eunuch"
-        "vim-polyglot"
-        "fzf-vim"
-        "LanguageClient-neovim"
-        "deoplete-go"
-        "deoplete-jedi"
-      ];
-      extraConfig = ''
-        let g:LanguageClient_serverCommands = {
-        \ 'python': ['pyls']
-        \ }
-        nnoremap <F5> :call LanguageClient_contextMenu()<CR>
-        nnoremap <silent> gh :call LanguageClient_textDocument_hover()<CR>
-        nnoremap <silent> gd :call LanguageClient_textDocument_definition()<CR>
-        nnoremap <silent> gr :call LanguageClient_textDocument_references()<CR>
-        nnoremap <silent> gs :call LanguageClient_textDocument_documentSymbol()<CR>
-        nnoremap <silent> <F2> :call LanguageClient_textDocument_rename()<CR>
-        nnoremap <silent> gf :call LanguageClient_textDocument_formatting()<CR>
+      withPython3 = true;
+      vimAlias = true;
+      viAlias = true;
+      configure = {
+        packages.myVimPackage = with pkgs.vimPlugins; {
+          start = [
+            vim-startify
+            vim-sensible
+            vim-fugitive
+            vim-gitgutter
+            vim-surround
+            vim-colorschemes
+            lightline-vim
+            vim-multiple-cursors
+            vim-eunuch
+            vim-polyglot
+            fzf-vim
+            LanguageClient-neovim
+            deoplete-go
+            deoplete-jedi
+          ];
+        };
+        customRC = ''
+          let g:LanguageClient_serverCommands = {
+          \ 'python': ['pyls']
+          \ }
+          nnoremap <F5> :call LanguageClient_contextMenu()<CR>
+          nnoremap <silent> gh :call LanguageClient_textDocument_hover()<CR>
+          nnoremap <silent> gd :call LanguageClient_textDocument_definition()<CR>
+          nnoremap <silent> gr :call LanguageClient_textDocument_references()<CR>
+          nnoremap <silent> gs :call LanguageClient_textDocument_documentSymbol()<CR>
+          nnoremap <silent> <F2> :call LanguageClient_textDocument_rename()<CR>
+          nnoremap <silent> gf :call LanguageClient_textDocument_formatting()<CR>
 
-        syntax on
-        color smyck
-        highlight Pmenu guibg=white guifg=black gui=bold
-        highlight Comment gui=bold
-        highlight Normal gui=none
-        highlight NonText guibg=none
+          syntax on
+          color smyck
+          highlight Pmenu guibg=white guifg=black gui=bold
+          highlight Comment gui=bold
+          highlight Normal gui=none
+          highlight NonText guibg=none
 
-        set mouse=a
+          set mouse=a
 
-        set splitbelow
-        set splitright
+          set splitbelow
+          set splitright
 
-        set termguicolors
+          set termguicolors
 
-        filetype plugin indent on
-        set tabstop=4
-        set softtabstop=4
-        set shiftwidth=4
-        set expandtab
-        set smarttab
+          filetype plugin indent on
+          set autoindent
+          set tabstop=4
+          set softtabstop=4
+          set shiftwidth=4
+          set expandtab
+          set smarttab
 
-        autoindent
-        set incsearch ignorecase smartcase hlsearch
-        set ruler laststatus=2 showcmd showmode
-        set nolist
-        set wrap breakindent
-        set encoding=utf-8
-        set number
-        set title
+          set incsearch ignorecase smartcase hlsearch
+          set ruler laststatus=2 showcmd showmode
+          set nolist
+          set wrap breakindent
+          set encoding=utf-8
+          set number
+          set title
 
-        let mapleader = "\<Space>"
-        nmap <leader>t :NERDTreeToggle<CR>
-        nmap <leader>b :TagbarToggle<CR>
-        nmap <leader>r :so ~/.config/nvim/init.vim<CR>
-        nmap <leader>s <C-w>s<C-w>j:terminal<CR>
-        nmap <leader>vs <C-w>v<C-w>l:terminal<CR>
-        nmap <leader>f :Files<CR>
-        nmap <silent> <leader><leader> :noh<CR>
-        nmap <Tab> :bnext<CR>
-        nmap <S-Tab> :bprevious<CR>
+          let mapleader = "\<Space>"
+          nmap <leader>t :NERDTreeToggle<CR>
+          nmap <leader>b :TagbarToggle<CR>
+          nmap <leader>r :so ~/.config/nvim/init.vim<CR>
+          nmap <leader>s <C-w>s<C-w>j:terminal<CR>
+          nmap <leader>vs <C-w>v<C-w>l:terminal<CR>
+          nmap <leader>f :Files<CR>
+          nmap <silent> <leader><leader> :noh<CR>
+          nmap <Tab> :bnext<CR>
+          nmap <S-Tab> :bprevious<CR>
 
-        nnoremap <leader>- <c-W>s
-        nnoremap <leader>/ <c-W>v
+          nnoremap <leader>- <c-W>s
+          nnoremap <leader>/ <c-W>v
 
-        " Disable .swp already exists warning
-        set shortmess+=A
-      '';
+          " Disable .swp already exists warning
+          set shortmess+=A
+        '';
+      };
     };
 
     programs.command-not-found.enable = true;
