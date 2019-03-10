@@ -34,7 +34,6 @@
       gitAndTools.gitFull
       gnupg
       go
-      i3
       jdk
       jq
       nmap
@@ -51,6 +50,11 @@
       unzip
       youtube-dl
       zathura
+
+      # i3
+      i3-gaps
+      jsoncpp
+      wirelesstools
     ];
 
     programs.man.enable = true;
@@ -156,7 +160,6 @@
 
     programs.command-not-found.enable = true;
 
-
     services = {
       blueman-applet.enable = true;
       dunst.enable = true;
@@ -172,8 +175,40 @@
     };
 
     services.gnome-keyring = {
-      enable = true;
+enable = true;
       components = [ "pkcs11" "secrets" "ssh" ];
+    };
+
+    services.polybar = {
+      package = pkgs.polybar.override {
+        i3GapsSupport = true;
+        pulseSupport = true;
+        #iwSupport = true;
+        githubSupport = true;
+      };
+      enable = true;
+      config = {
+        "bar/top" = {
+          monitor = "eDP1";
+          width = "100%";
+          height = "3%";
+          radius = 0;
+          modules-center = "date i3";
+        };
+        "module/date" = {
+          type = "internal/date";
+          internal = 5;
+          date = "%d.%m.%y";
+          time = "%H:%M";
+          label = "%time%  %date%";
+        };
+        "module/i3" = {
+          type = "internal/i3";
+          scroll-up = "i3wm-wsnext";
+          scroll-down = "i3wm-wsprev";
+        };
+      };
+      script = "polybar bar &";
     };
 
     home.sessionVariables = {
@@ -185,17 +220,40 @@
     xsession = {
       enable = true;
       windowManager.i3 = rec {
+        package = pkgs.i3-gaps;
         enable = true;
         config = {
+          startup = [];
+          bars = [{}];
+          gaps = {
+            inner = null;
+            outer = null;
+            smartGaps = false;
+            smartBorders = "on";
+          };
           modifier = "Mod1";
+          keycodebindings = let mod = config.modifier; in {
+            "${mod}+49" = "workspace 0";
+            "${mod}+Shift+49" = "move container to workspace 0";
+          };
           keybindings = let mod = config.modifier; in {
-            "${mod}+Return" = "exec i3-sensible-terminal";
-            "${mod}+Print" = "exec flameshot gui";
-            "${mod}+enter" = "exec i3-sensible-terminal";
             "${mod}+Shift+r" = "restart";
+            "${mod}+Shift+c" = "reload";
             "${mod}+Shift+q" = "kill";
+
+            "${mod}+Shift+plus" = "gaps inner all plus 5";
+            "${mod}+Shift+minus" = "gaps inner all minus 5";
+
+            "${mod}+r" = "mode resize";
+            "${mod}+x" = "mode machine";
+
+            "${mod}+Return" = "exec i3-sensible-terminal";
             "${mod}+d" = "exec i3-sensible-terminal -e ranger";
-            "${mod}+b" = "exec chromium";
+            "${mod}+p" = "exec ${pkgs.dmenu}/bin/dmenu_run -i -l 20";
+            "${mod}+b" = "exec ${pkgs.chromium}/bin/chromium -incognito --force-device-scale-factor=1.1";
+            "${mod}+s" = "exec ${pkgs.pavucontrol}/bin/pavucontrol &";
+            "${mod}+Print" = "exec ${pkgs.flameshot}/bin/flameshot gui";
+
             "${mod}+h" = "focus left";
             "${mod}+j" = "focus down";
             "${mod}+k" = "focus up";
@@ -204,6 +262,7 @@
             "${mod}+Down" = "focus down";
             "${mod}+Up" = "focus up";
             "${mod}+Right" = "focus right";
+
             "${mod}+Shift+h" = "move left";
             "${mod}+Shift+j" = "move down";
             "${mod}+Shift+k" = "move up";
@@ -212,12 +271,13 @@
             "${mod}+Shift+Down" = "move down";
             "${mod}+Shift+Up" = "move up";
             "${mod}+Shift+Right" = "move right";
+
             "${mod}+g" = "split h";
             "${mod}+v" = "split v";
             "${mod}+f" = "fullscreen";
-            "${mod}+Shift+s" = "layout stacking";
-            "${mod}+Shift+t" = "layout tabbed";
+
             "${mod}+Shift+f" = "floating toggle";
+
             "${mod}+1" = "workspace 1";
             "${mod}+2" = "workspace 2";
             "${mod}+3" = "workspace 3";
@@ -227,7 +287,7 @@
             "${mod}+7" = "workspace 7";
             "${mod}+8" = "workspace 8";
             "${mod}+9" = "workspace 9";
-            "${mod}+0" = "workspace 10";
+
             "${mod}+Shift+1" = "move container to workspace 1";
             "${mod}+Shift+2" = "move container to workspace 2";
             "${mod}+Shift+3" = "move container to workspace 3";
@@ -237,9 +297,65 @@
             "${mod}+Shift+7" = "move container to workspace 7";
             "${mod}+Shift+8" = "move container to workspace 8";
             "${mod}+Shift+9" = "move coltainer to workspace 9";
-            "${mod}+Shift+0" = "move container to workspace 10";
           };
-	    };
+          modes = {
+            resize = {
+              "h" = "resize shrink width 10 px or 10 ppt";
+              "j" = "resize grow height 10 px or 10 ppt";
+              "k" = "resize shrink height 10 px or 10 ppt";
+              "l" = "resize grow width 10 px or 10 ppt";
+              "Return" = "mode default";
+              "Escape" = "mode default";
+            };
+            machine = {
+              "e" = "exec i3-msg exit";
+              "s" = "exec systemctl suspend";
+              "h" = "exec systemctl hibernate";
+              "r" = "exec systemctl reboot";
+              "p" = "exec systemctl poweroff";
+              "Return" = "mode default";
+              "Escape" = "mode default";
+            };
+          };
+          colors = {
+            background = "#ffffff";
+            focused = {
+              border = "#4c7899";
+              background = "#285577";
+              text = "#ffffff";
+              indicator = "#2e9ef4";
+              childBorder = "#285577";
+            };
+            focusedInactive = {
+              border = "#333333";
+              background = "#5f676a";
+              text = "#ffffff";
+              indicator = "#484e50";
+              childBorder = "#5f676a";
+            };
+            unfocused = {
+              border = "#333333";
+              background = "#222222";
+              text = "#888888";
+              indicator = "#292d2e";
+              childBorder = "#222222";
+            };
+            urgent = {
+              border = "#2f343a";
+              background = "#900000";
+              text = "#ffffff";
+              indicator = "#900000";
+              childBorder = "#900000";
+            };
+            placeholder = {
+              border = "#000000";
+              background = "#0c0c0c";
+              text = "#ffffff";
+              indicator = "#000000";
+              childBorder = "#0c0c0c";
+            };
+          };
+        };
       };
       scriptPath = ".xsession-hm";
       profileExtra =
