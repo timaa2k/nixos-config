@@ -42,21 +42,37 @@
   time.timeZone = "Europe/Berlin";
 
   environment.systemPackages = with pkgs; [
-     blueman
-     gitAndTools.gitFull
-     networkmanager
-     nix-index
-     nix-prefetch-git nix-prefetch-scripts
-     wget
-     vim
-     unzip                  # Archives
-     tree                   # Show file hierarchies
-     fzf                    # Fuzzy file finder
-     ripgrep                # Fast grep replacement
-     bat                    # Cat replacement
-     fd                     # Find replacement
-     gotop                  # Top replacement
-     ncdu                   # Fancy disk usage analyzer
+
+    # essential
+    coreutils
+    dcfldd
+    fd
+    psmisc
+    ripgrep
+    tree
+    utillinux
+
+    # monitor 
+    atop
+    htop
+    iotop
+    ncdu
+    sysstat
+
+    # connect
+    blueman
+    networkmanager
+
+    # setup
+    curl
+    gitAndTools.gitFull
+    vim
+    wget
+
+    # nixos
+    nix-index
+    nix-prefetch-git nix-prefetch-scripts
+
   ];
 
   environment.variables = {
