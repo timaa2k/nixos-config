@@ -30,6 +30,7 @@
       exa
       fzf
       gitAndTools.gitFull
+      gnumake
       gnupg
       go
       jq
@@ -54,6 +55,7 @@
       flameshot
       pavucontrol
       slack
+      vlc
       zathura
 
       # i3

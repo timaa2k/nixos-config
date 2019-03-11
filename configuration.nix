@@ -44,34 +44,42 @@
   environment.systemPackages = with pkgs; [
 
     # essential
+    bind
     coreutils
+    curl
     dcfldd
     fd
+    gitAndTools.gitFull
+    gitAndTools.hub
+    lsof
+    pciutils
     psmisc
     ripgrep
     tree
+    usbutils
     utillinux
+    vim
+    wget
 
     # monitor 
     atop
+    ethtool
     htop
     iotop
     ncdu
     sysstat
+    tcpdump
 
     # connect
     blueman
     networkmanager
 
-    # setup
-    curl
-    gitAndTools.gitFull
-    vim
-    wget
 
     # nixos
     nix-index
-    nix-prefetch-git nix-prefetch-scripts
+    nix-prefetch-git
+    nix-prefetch-scripts
+    mkpasswd
 
   ];
 
