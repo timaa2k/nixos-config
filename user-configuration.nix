@@ -13,9 +13,7 @@
 
   nixpkgs.config.chromium = {
     proprietaryCodecs = true;
-    enablePepperFlash = true;
-    enablePepperPDF = true;
-    enableNacl = true;
+    #enablePepperFlash = true;
   };
 
   home-manager.users.tim = {
@@ -196,11 +194,15 @@ enable = true;
       enable = true;
       config = {
         "bar/top" = {
-          monitor = "eDP1";
+          #font-0 = "mononoki:size-10";
+          monitor = "\${env:MONITOR:eDP1}";
           width = "100%";
           height = "3%";
           radius = 0;
-          modules-center = "i3 date";
+          module-margin = 4;
+          #modules-left = "i3";
+          modules-center = "i3 date battery";
+          #modules-right = "battery";
         };
         "module/i3" = {
           type = "internal/i3";
@@ -213,6 +215,12 @@ enable = true;
           date = "%d.%m.%y";
           time = "%H:%M";
           label = "%time%  %date%";
+        };
+        "module/battery" = {
+          type = "internal/battery";
+          battery = "BAT0";
+          adapter = "AC";
+          full-at = 99;
         };
       };
       script = "polybar top &";
