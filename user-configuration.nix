@@ -16,11 +16,49 @@
     #enablePepperFlash = true;
   };
 
+  fonts.fonts = with pkgs; [
+    corefonts
+    dejavu_fonts
+    dina-font
+    fira-code
+    fira-code-symbols
+    font-awesome-ttf
+    inconsolata
+    liberation_ttf
+    mplus-outline-fonts
+    noto-fonts
+    noto-fonts-cjk
+    noto-fonts-emoji
+    powerline-fonts
+    proggyfonts
+    roboto
+    source-code-pro
+    source-sans-pro
+    source-serif-pro
+    terminus_font
+    ubuntu_font_family
+  ];
+  fonts.fontconfig.ultimate.enable = true;
+
+  fonts.fontconfig.defaultFonts = {
+    monospace = [
+      #"DejaVu Sans Mono"
+    ];
+    sansSerif = [
+      #"DejaVu Sans"
+    ];
+    serif = [
+      #"DejaVu Serif"
+    ];
+  };
+
   home-manager.users.tim = {
 
     #fonts.fontconfig.enableProfileFonts = true;
     home.language = {};
-    home.keyboard = {};
+    home.keyboard = {
+      options = [ "caps:ctrl_modifier" ];
+    };
 
     home.packages = with pkgs; [
 
@@ -51,6 +89,7 @@
       dmenu
       feh
       flameshot
+      networkmanagerapplet
       pavucontrol
       slack
       vlc
@@ -75,6 +114,9 @@
       enable = true;
       userName  = "Tim Weidner";
       userEmail = "timaa2k@gmail.com";
+      aliases = {
+        authors = "shortlog -s -n";
+      };
     };
 
     programs.neovim = {
@@ -194,33 +236,56 @@ enable = true;
       enable = true;
       config = {
         "bar/top" = {
-          #font-0 = "mononoki:size-10";
-          monitor = "\${env:MONITOR:eDP1}";
+          font-0 = "Fira Code:size=11;2";
+          font-1 = "Roboto:size=11:weight=bold;2";
+          font-2 = "Noto Sans:size=11;1";
+          font-4 = "Font Awesome 5 Free:pixelsize=10;0";
+          monitor = "\${env:MONITOR:eDP-1}";
           width = "100%";
           height = "3%";
           radius = 0;
           module-margin = 4;
-          #modules-left = "i3";
-          modules-center = "i3 date battery";
-          #modules-right = "battery";
+          modules-left = "i3";
+          modules-center = "";
+          modules-right = "wlan cpu memory battery date";
+          tray-position = "right";
+          tray-maxsize = 16;
+          tray-padding = 2;
+          #tray-background = "#aa2222";
         };
         "module/i3" = {
           type = "internal/i3";
           scroll-up = "i3wm-wsnext";
           scroll-down = "i3wm-wsprev";
         };
-        "module/date" = {
-          type = "internal/date";
-          internal = 5;
-          date = "%d.%m.%y";
-          time = "%H:%M";
-          label = "%time%  %date%";
+        "module/wlan" = {
+          type = "internal/wlan";
+          interval = 3;
+          interface = "wlp3s0";
+          label-connected = "WLAN%essid%%";
+        };
+        "module/cpu" = {
+          type = "internal/cpu";
+          interval = 2;
+          label = "CPU %percentage:2%%";
+        };
+        "module/memory" = {
+          type = "internal/memory";
+          interval = 2;
+          label = "RAM %percentage_used:2%%";
         };
         "module/battery" = {
           type = "internal/battery";
           battery = "BAT0";
-          adapter = "AC";
-          full-at = 99;
+          adapter = "AC0";
+          full-at = 100;
+        };
+        "module/date" = {
+          type = "internal/date";
+          interval = 5;
+          date = "%d.%m.%y";
+          time = "%H:%M:%S";
+          label = "%date%  %time%";
         };
       };
       script = "polybar top &";
@@ -230,6 +295,7 @@ enable = true;
       BROWSER = "chromium";
       EDITOR = "vim";
       TERMINAL = "alacritty";
+      WINIT_HIDPI_FACTOR = "1.0 alacritty";
     };
 
     xsession = {
@@ -431,10 +497,9 @@ enable = true;
               x: 0
               y: 0
             # `WINIT_HIDPI_FACTOR=1.0 alacritty`
-            scale_with_dpi: true
+            #scale_with_dpi: true
 
           render_timer: false
-          custom_cursor_colors: false
           draw_bold_text_with_bright_colors: true
 
           colors:
@@ -495,11 +560,10 @@ enable = true;
 
           dynamic_title: true
 
-          hide_cursor_when_typing: false
+          mouse.hide_when_typing: false
 
-          cursor_style: Block
-
-          unfocused_hollow_cursor: true
+          cursor.style: Block
+          cursor.unfocused_hollow: true
 
           live_config_reload: true
 

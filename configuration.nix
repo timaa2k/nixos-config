@@ -9,7 +9,7 @@
     [
       ./hardware-configuration.nix
       ./user-configuration.nix
-      "${builtins.fetchTarball https://github.com/rycee/home-manager/archive/release-18.09.tar.gz}/nixos"
+      "${builtins.fetchTarball https://github.com/rycee/home-manager/archive/release-19.03.tar.gz}/nixos"
     ];
 
   boot = {
@@ -34,6 +34,7 @@
   i18n = {
     # HiDPI Font
     consoleFont = "latarcyrheb-sun32";
+    #consoleKeyMap = "us";
     consoleUseXkbConfig = true;
     defaultLocale = "en_US.UTF-8";
     supportedLocales = [ "en_US.UTF-8/UTF-8" ];
@@ -74,7 +75,6 @@
     blueman
     networkmanager
 
-
     # nixos
     nix-index
     nix-prefetch-git
@@ -87,9 +87,30 @@
     EDITOR = "vim";
   };
 
+  #hardware.bluetooth.enable = true;
+  # Add extra config for modern Bluetooth headsets.
+  #hardware.bluetooth.extraConfig = "
+  #  [General]
+  #  Enable=Source,Sink,Media,Socket
+  #";
+
   # Enable sound.
   sound.enable = true;
-  hardware.pulseaudio.enable = true;
+  hardware.pulseaudio = {
+    enable = true;
+    # Enable Bluetooth sound.
+    package = pkgs.pulseaudioFull;
+  #  extraModules = [ pkgs.pulseaudio-modules-bt ];
+  #  configFile = pkgs.writeText "default.pa" ''
+  #    load-module module-bluetooth-policy
+  #    load-module module-bluetooth-discover
+  #    ## module fails to load with 
+  #    ##   module-bluez5-device.c: Failed to get device path from module arguments
+  #    ##   module.c: Failed to load module "module-bluez5-device" (argument: ""): initialization failed.
+  #    # load-module module-bluez5-device
+  #    # load-module module-bluez5-discover
+  #  '';
+  };
 
   programs.ssh = {
     startAgent = true;
@@ -103,7 +124,7 @@
 
     xserver = {
       enable = true;
-      dpi = 180;
+      dpi = 192;
       libinput.enable = true;
       layout = "us";
 
