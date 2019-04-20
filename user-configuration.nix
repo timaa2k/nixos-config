@@ -16,6 +16,7 @@
     #enablePepperFlash = true;
   };
 
+
   fonts.fonts = with pkgs; [
     corefonts
     dejavu_fonts
@@ -42,15 +43,17 @@
 
   fonts.fontconfig.defaultFonts = {
     monospace = [
-      #"DejaVu Sans Mono"
+      "DejaVu Sans Mono"
     ];
     sansSerif = [
-      #"DejaVu Sans"
+      "DejaVu Sans"
     ];
     serif = [
-      #"DejaVu Serif"
+      "DejaVu Serif"
     ];
   };
+
+  fonts.fontconfig.dpi = 168;
 
   home-manager.users.tim = {
 
@@ -74,6 +77,7 @@
       tmux
       udisks
       unzip
+      xorg.xdpyinfo
       youtube-dl
 
       # python
@@ -236,7 +240,7 @@ enable = true;
       enable = true;
       config = {
         "bar/top" = {
-          font-0 = "Fira Code:size=11;2";
+          font-0 = "monospace:size=11;2";
           font-1 = "Roboto:size=11:weight=bold;2";
           font-2 = "Noto Sans:size=11;1";
           font-4 = "Font Awesome 5 Free:pixelsize=10;0";
@@ -295,7 +299,7 @@ enable = true;
       BROWSER = "chromium";
       EDITOR = "vim";
       TERMINAL = "alacritty";
-      WINIT_HIDPI_FACTOR = "1.0 alacritty";
+      #WINIT_HIDPI_FACTOR = "1";
     };
 
     xsession = {
@@ -489,15 +493,13 @@ enable = true;
             italic:
               family: monospace
               style: Italic
-            size: 9.0
+            size: 8.0
             offset:
               x: 0
               y: 0
             glyph_offset:
               x: 0
               y: 0
-            # `WINIT_HIDPI_FACTOR=1.0 alacritty`
-            #scale_with_dpi: true
 
           render_timer: false
           draw_bold_text_with_bright_colors: true
