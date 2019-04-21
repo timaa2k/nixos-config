@@ -14,8 +14,8 @@
   nixpkgs.config.chromium = {
     proprietaryCodecs = true;
     #enablePepperFlash = true;
-  };
 
+  };
 
   fonts.fonts = with pkgs; [
     corefonts
@@ -104,6 +104,17 @@
       jsoncpp
       wirelesstools
     ];
+
+    programs.chromium = {
+      enable = true;
+      extensions = [
+        "gighmmpiobklfepjocnamgkkbiglidom" # AdBlock
+        "mlomiejdfkolichcflejclcbmpeaniij" # Ghostery
+        "dbepggeogbaibhgnhhndojpepiihcmeb" # Vimium
+        "kgjfgplpablkjnlkjmjdecgdpfankdle" # Zoom Scheduler
+        "fdpohaocaechififmbbbbbknoalclacl" # Full Page Screen Capture
+      ];
+    };
 
     programs.man.enable = true;
 
@@ -299,7 +310,7 @@ enable = true;
       BROWSER = "chromium";
       EDITOR = "vim";
       TERMINAL = "alacritty";
-      #WINIT_HIDPI_FACTOR = "1";
+      WINIT_HIDPI_FACTOR = "1";
     };
 
     xsession = {
@@ -341,7 +352,7 @@ enable = true;
             "${mod}+Return"      = "exec i3-sensible-terminal";
             "${mod}+d"           = "exec i3-sensible-terminal -e ranger";
             "${mod}+p"           = "exec ${pkgs.dmenu}/bin/dmenu_run -i -l 20";
-            "${mod}+b"           = "exec ${pkgs.chromium}/bin/chromium -incognito --force-device-scale-factor=2.0";
+            "${mod}+b"           = "exec ${pkgs.chromium}/bin/chromium --incognito --force-device-scale-factor=1.5";
             "${mod}+s"           = "exec ${pkgs.pavucontrol}/bin/pavucontrol &";
             "${mod}+Print"       = "exec ${pkgs.flameshot}/bin/flameshot gui";
 
@@ -458,8 +469,19 @@ enable = true;
       '';
     };
 
+    xresources.properties = {
+      "Xft*dpi" = 192;
+    };
+    #xresources.extraConfig = {};
+
     xdg = {
       enable = true;
+
+      #configFile."chromium-flags.conf" = {
+      #  text = ''
+      #    --force-device-scale-factor=1.1
+      #  '';
+      #};
 
       configFile."alacritty/alacritty.yml" = {
         text = ''
@@ -493,7 +515,7 @@ enable = true;
             italic:
               family: monospace
               style: Italic
-            size: 8.0
+            size: 18.0
             offset:
               x: 0
               y: 0
