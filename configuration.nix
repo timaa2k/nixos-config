@@ -116,6 +116,8 @@
     startAgent = true;
   };
 
+  virtualisation.docker.enable = true;
+
   services = {
 
     logind.extraConfig = "HandlePowerKey=suspend";
@@ -134,8 +136,9 @@
         #autoLogin = false;
       };
 
-      desktopManager.plasma5 = {
-        enable = true;
+      desktopManager = {
+        plasma5.enable = true;
+        wallpaper.mode = "fill";
       };
 
       desktopManager.session = [{

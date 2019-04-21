@@ -14,7 +14,6 @@
   nixpkgs.config.chromium = {
     proprietaryCodecs = true;
     #enablePepperFlash = true;
-
   };
 
   fonts.fonts = with pkgs; [
@@ -24,8 +23,8 @@
     fira-code
     fira-code-symbols
     font-awesome-ttf
-    inconsolata
     liberation_ttf
+    material-design-icons
     mplus-outline-fonts
     noto-fonts
     noto-fonts-cjk
@@ -33,6 +32,7 @@
     powerline-fonts
     proggyfonts
     roboto
+    siji
     source-code-pro
     source-sans-pro
     source-serif-pro
@@ -73,11 +73,13 @@
       gnupg
       go
       jq
+      libnotify
       ranger
       tmux
       udisks
       unzip
       xorg.xdpyinfo
+      xorg.xfontsel
       youtube-dl
 
       # python
@@ -251,18 +253,21 @@ enable = true;
       enable = true;
       config = {
         "bar/top" = {
-          font-0 = "monospace:size=11;2";
-          font-1 = "Roboto:size=11:weight=bold;2";
-          font-2 = "Noto Sans:size=11;1";
-          font-4 = "Font Awesome 5 Free:pixelsize=10;0";
+          enable-ipc = true;
+          font-0 = "Hack:weight=bold:size=14;2";
+          font-1 = "Terminus:pixelsize=20;2";
+          font-2 = "Hack:size=12;2";
+          font-3 = "FontAwesome:pixelsize=18;2";
+          font-4 = "Material Design Icons:size=18;2";
           monitor = "\${env:MONITOR:eDP-1}";
           width = "100%";
-          height = "3%";
+          height = "2%";
           radius = 0;
-          module-margin = 4;
-          modules-left = "i3";
-          modules-center = "";
-          modules-right = "wlan cpu memory battery date";
+          line-size = 3;
+          module-margin = 1;
+          modules-left = "";
+          modules-center = "i3";
+          modules-right = "wlan cpu memory pulseaudio battery date keyboard";
           tray-position = "right";
           tray-maxsize = 16;
           tray-padding = 2;
@@ -272,35 +277,209 @@ enable = true;
           type = "internal/i3";
           scroll-up = "i3wm-wsnext";
           scroll-down = "i3wm-wsprev";
+          pin-workspaces = true;
+          strip-wsnumbers = true;
+          enable-scroll = true;
+          wrapping-scroll = true;
+          enable-click = true;
+
+          format = "<label-state> <label-mode>";
+
+          # Available tokens:
+          #   %name%
+          #   %icon%
+          #   %index%
+          #   %output%
+          # Default: %icon%  %name%
+          label-focused = "%index%";
+          label-focused-foreground = "#ffffff";
+          label-focused-background = "#3f3f3f";
+          label-focused-underline = "#fba922";
+          label-focused-padding = 1;
+
+          label-unfocused = "%index%";
+          label-unfocused-padding = 1;
+          label-unfocused-underline = "#1db954";
+
+          label-visible = "%index%";
+          label-visible-underline = "#555555";
+          label-visible-padding = 1;
+
+          label-urgent = "%index%";
+          label-urgent-foreground = "#000000";
+          label-urgent-background = "#bd2c40";
+          label-urgent-padding = 1;
+
+          label-separator = "";
+          label-separator-padding = 0;
+          label-separator-foreground = "#ffb52a";
+
+          label-mode = "%mode%";
+          label-mode-padding = 1;
+          label-mode-background = "#e60053";
         };
         "module/wlan" = {
-          type = "internal/wlan";
-          interval = 3;
+          type = "internal/network";
+          interval = 1;
           interface = "wlp3s0";
-          label-connected = "WLAN%essid%%";
+          ping-interval = 10;
+
+          label-connected = "%signal%% %essid%";
+          format-connected = "<ramp-signal> <label-connected>";
+          format-connected-underline = "#FFFF00";
+          label-disconnected = "disconnected";
+          label-disconnected-foreground = "#66";
+          format-disconnected = "<label-disconnected>";
+          format-disconnected-underline = "#FF0000";
+
+          ramp-signal-0 = "冷";
+          ramp-signal-0-font = 4;
+          ramp-signal-0-foreground = "#aaff77";
+          ramp-signal-1 = "爛";
+          ramp-signal-1-font = 4;
+          ramp-signal-1-foreground = "#aaff77";
+          ramp-signal-2 = "嵐";
+          ramp-signal-2-font = 4;
+          ramp-signal-2-foreground = "#aaff77";
+          ramp-signal-3 = "襤";
+          ramp-signal-3-font = 4;
+          ramp-signal-3-foreground = "#fba922";
+          ramp-signal-4 = "蠟";
+          ramp-signal-4-font = 4;
+          ramp-signal-4-foreground = "#ff5555";
+
+          animation-packetloss-0 = "浪";
+          animation-packetloss-0-font = 4;
+          animation-packetloss-0-foreground = "#ffa64c";
+          animation-packetloss-1 = "廊";
+          animation-packetloss-1-font = 4;
+          animation-packetloss-1-foreground = "#ffffff";
+          animation-packetloss-framerate = 500;
         };
         "module/cpu" = {
           type = "internal/cpu";
-          interval = 2;
-          label = "CPU %percentage:2%%";
+          interval = "0.5";
+          label = "%{A1:notify-send 'This is your CPU speaking':}%{A}";
+          format = "<label> <ramp-coreload>";
+          format-underline = "#ffa500";
+          ramp-coreload-0 = "▁";
+          ramp-coreload-0-font = 2;
+          ramp-coreload-0-foreground = "#aaff77";
+          ramp-coreload-1 = "▂";
+          ramp-coreload-1-font = 2;
+          ramp-coreload-1-foreground = "#aaff77";
+          ramp-coreload-2 = "▃";
+          ramp-coreload-2-font = 2;
+          ramp-coreload-2-foreground = "#aaff77";
+          ramp-coreload-3 = "▄";
+          ramp-coreload-3-font = 2;
+          ramp-coreload-3-foreground = "#aaff77";
+          ramp-coreload-4 = "▅";
+          ramp-coreload-4-font = 2;
+          ramp-coreload-4-foreground = "#fba922";
+          ramp-coreload-5 = "▆";
+          ramp-coreload-5-font = 2;
+          ramp-coreload-5-foreground = "#fba922";
+          ramp-coreload-6 = "▇";
+          ramp-coreload-6-font = 2;
+          ramp-coreload-6-foreground = "#ff5555";
+          ramp-coreload-7 = "█";
+          ramp-coreload-7-font = 2;
+          ramp-coreload-7-foreground = "#ff5555";
         };
         "module/memory" = {
           type = "internal/memory";
           interval = 2;
-          label = "RAM %percentage_used:2%%";
+          format = "<label>";
+          label = " %gb_used%";
+          label-font = 4;
         };
         "module/battery" = {
           type = "internal/battery";
           battery = "BAT0";
-          adapter = "AC0";
+          adapter = "ADP1";
           full-at = 100;
+
+          format-charging = "<animation-charging> <label-charging>";
+          format-charging-underline = "#00FF00";
+          format-discharging = "<ramp-capacity> <label-discharging>";
+          format-discharging-underline = "#FF0000";
+          format-full = "<ramp-capacity> <label-full>";
+          format-full-underline = "#00FF00";
+
+          time-format = "%H:%M";
+          label-charging = "%percentage%% %time%h";
+          label-discharging = "%percentage%% %time%h";
+
+          ramp-capacity-0 = "";
+          ramp-capacity-0-foreground = "#f53c3c";
+          ramp-capacity-1 = "";
+          ramp-capacity-1-foreground = "#ffa900";
+          ramp-capacity-2 = "";
+          ramp-capacity-2-foreground = "#ddffff";
+          ramp-capacity-3 = "";
+          ramp-capacity-3-foreground = "#ddffff";
+          ramp-capacity-4 = "";
+          ramp-capacity-4-foreground = "#ddffff";
+
+          bar-capacity-width = "10";
+          bar-capacity-format = "%{+u}%{+o}%fill%%empty%%{-u}%{-o}";
+          bar-capacity-fill = "█";
+          bar-capacity-fill-foreground = "#ddffff";
+          bar-capacity-fill-font = 2;
+          bar-capacity-empty = "█";
+          bar-capacity-empty-font = 2;
+          bar-capacity-empty-foreground = "#44ffff";
+
+          animation-charging-0 = "";
+          animation-charging-1 = "";
+          animation-charging-2 = "";
+          animation-charging-3 = "";
+          animation-charging-4 = "";
+          animation-charging-framerate = 750;
+        };
+        "module/pulseaudio" = {
+          type = "internal/pulseaudio";
+          #sink = "";
+          use-ui-max = false;
+          interval = 5;
+
+          label-volume = "";
+          label-volume-font = 4;
+          format-volume = "<label-volume> <bar-volume>";
+          format-volume-underline = "#FF0000";
+
+          label-muted = "";
+          label-muted-font = 4;
+          format-muted = "<label-muted>";
+          format-muted-underline = "#FF0000";
+
+          bar-volume-width = 8;
+          bar-volume-foreground-0 = "#aaff77";
+          bar-volume-foreground-1 = "#aaff77";
+          bar-volume-foreground-2 = "#fba922";
+          bar-volume-foreground-3 = "#ff5555";
+          bar-volume-indicator = "|";
+          bar-volume-indicator-font = 6;
+          bar-volume-indicator-foreground = "#ffffff";
+          bar-volume-fill = "─";
+          bar-volume-fill-font = 6;
+          bar-volume-empty = "─";
+          bar-volume-empty-font = 6;
+          bar-volume-empty-foreground = "#444444";
         };
         "module/date" = {
           type = "internal/date";
           interval = 5;
-          date = "%d.%m.%y";
-          time = "%H:%M:%S";
-          label = "%date%  %time%";
+          date = "%d.%m";
+          time = "%H:%M";
+          label = "%date% %time%";
+          format-underline = "#0000FF";
+        };
+        "module/keyboard" = {
+          type = "internal/xkeyboard";
+          format = "<label-layout> <label-indicator>";
+          label-indicator = "%name%";
         };
       };
       script = "polybar top &";
@@ -507,13 +686,13 @@ enable = true;
 
           font:
             normal:
-              family: monospace
+              family: Hack
               style: Regular
             bold:
-              family: monospace
+              family: Hack
               style: Bold
             italic:
-              family: monospace
+              family: Hack
               style: Italic
             size: 18.0
             offset:
