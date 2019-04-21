@@ -265,13 +265,25 @@ enable = true;
           radius = 0;
           line-size = 3;
           module-margin = 1;
-          modules-left = "";
+          modules-left = "title";
           modules-center = "i3";
           modules-right = "wlan cpu memory pulseaudio battery date keyboard";
           tray-position = "right";
           tray-maxsize = 16;
           tray-padding = 2;
           #tray-background = "#aa2222";
+        };
+        "module/title" = {
+          type = "internal/xwindow";
+          format = "<label>";
+          #format-background = "#eee";
+          format-foreground = "#fff";
+          format-underline = "#fff";
+          format-padding = 1;
+          label = "%title%";
+          label-maxlen = 100;
+          label-empty = "";
+          label-empty-foreground = "#707880";
         };
         "module/i3" = {
           type = "internal/i3";
