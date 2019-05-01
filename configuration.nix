@@ -49,6 +49,7 @@
     coreutils
     curl
     dcfldd
+    file
     fd
     gitAndTools.gitFull
     gitAndTools.hub
@@ -66,8 +67,10 @@
     atop
     ethtool
     htop
+    iftop
     iotop
     ncdu
+    nethogs
     sysstat
     tcpdump
 
@@ -150,6 +153,11 @@
       }];
     };
   };
+
+  security.sudo.configFile = ''
+    %wheel ALL = (ALL) ALL
+    %wheel ALL = (root) NOPASSWD: /run/current-system/sw/bin/nethogs
+  '';
 
   security.sudo.extraConfig = "Defaults timestamp_timeout=60";
   # This value determines the NixOS release with which your system is to be

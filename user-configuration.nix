@@ -66,6 +66,7 @@
     home.packages = with pkgs; [
 
       # cmdline
+      bundler
       exa
       fzf
       gitAndTools.gitFull
@@ -75,6 +76,7 @@
       jq
       libnotify
       ranger
+      ruby
       tmux
       udisks
       unzip
@@ -253,25 +255,70 @@ enable = true;
       enable = true;
       config = {
         "bar/top" = {
-          enable-ipc = true;
-          font-0 = "Hack:weight=bold:size=14;2";
+          locale = "en_US.UTF-8";
+          monitor = "\${env:MONITOR:eDP-1}";
+          monitor-fallback = "eDP-1";
+          monitor-strict = false;
+
+          width = "100%";
+          height = "2%";
+          #offset-x = "1%";
+          #offset-y = "1%";
+          radius = 0;
+          line-size = 1;
+          underline-size = 2;
+          underline-color = "#f00";
+
+          module-margin = 1;
+          fixed-center = true;
+
+          modules-left = "i3 title";
+          modules-center = "";
+          modules-right = "wifi disk cpu temperature memory battery date";
+
+          # font-N = <fontconfig pattern>:<vertical offset>
+          font-0 = "Terminus:pixelsize=22;2";
           font-1 = "Terminus:pixelsize=20;2";
           font-2 = "Hack:size=12;2";
           font-3 = "FontAwesome:pixelsize=18;2";
           font-4 = "Material Design Icons:size=18;2";
+
+          enable-ipc = true;
+        };
+        "bar/bottom" = {
+          bottom = true;
           monitor = "\${env:MONITOR:eDP-1}";
+
           width = "100%";
           height = "2%";
+          #offset-x = "1%";
+          #offset-y = "1%";
           radius = 0;
-          line-size = 3;
-          module-margin = 1;
-          modules-left = "title";
-          modules-center = "i3";
-          modules-right = "wlan cpu memory pulseaudio battery date keyboard";
+          line-size = 1;
+          underline-size = 2;
+          underline-color = "#f00";
+
           tray-position = "right";
           tray-maxsize = 16;
           tray-padding = 2;
+          tray-scale = "1.0";
           #tray-background = "#aa2222";
+
+          module-margin = 1;
+          modules-left = "";
+          modules-center = "";
+          modules-right = "pulseaudio keyboard";
+
+          # font-N = <fontconfig pattern>:<vertical offset>
+          font-0 = "Terminus:pixelsize=22;2";
+          font-1 = "Terminus:pixelsize=20;2";
+          font-2 = "Hack:size=12;2";
+          font-3 = "FontAwesome:pixelsize=18;2";
+          font-4 = "Material Design Icons:size=18;2";
+
+          pseudo-transparency = true;
+
+          enable-ipc = true;
         };
         "module/title" = {
           type = "internal/xwindow";
@@ -330,35 +377,30 @@ enable = true;
           label-mode-padding = 1;
           label-mode-background = "#e60053";
         };
-        "module/wlan" = {
+        "module/wifi" = {
           type = "internal/network";
           interval = 1;
           interface = "wlp3s0";
           ping-interval = 10;
 
-          label-connected = "%signal%% %essid%";
+          label-connected = "%{A1:/home/tim/.nix-profile/bin/nm-connection-editor:}%signal%% %essid%%{A}";
           format-connected = "<ramp-signal> <label-connected>";
           format-connected-underline = "#FFFF00";
-          label-disconnected = "disconnected";
+          label-disconnected = "%{A1:/home/tim/.nix-profile/bin/nm-connection-editor:}disconnected%{A}";
           label-disconnected-foreground = "#66";
           format-disconnected = "<label-disconnected>";
           format-disconnected-underline = "#FF0000";
 
           ramp-signal-0 = "冷";
           ramp-signal-0-font = 4;
-          ramp-signal-0-foreground = "#aaff77";
           ramp-signal-1 = "爛";
           ramp-signal-1-font = 4;
-          ramp-signal-1-foreground = "#aaff77";
           ramp-signal-2 = "嵐";
           ramp-signal-2-font = 4;
-          ramp-signal-2-foreground = "#aaff77";
           ramp-signal-3 = "襤";
           ramp-signal-3-font = 4;
-          ramp-signal-3-foreground = "#fba922";
           ramp-signal-4 = "蠟";
           ramp-signal-4-font = 4;
-          ramp-signal-4-foreground = "#ff5555";
 
           animation-packetloss-0 = "浪";
           animation-packetloss-0-font = 4;
@@ -371,9 +413,9 @@ enable = true;
         "module/cpu" = {
           type = "internal/cpu";
           interval = "0.5";
-          label = "%{A1:notify-send 'This is your CPU speaking':}%{A}";
+          label = "%{A1:WINIT_HIDPI_FACTOR=1 /home/tim/.nix-profile/bin/alacritty -e /run/current-system/sw/bin/htop:}CPU%{A}";
           format = "<label> <ramp-coreload>";
-          format-underline = "#ffa500";
+          #format-underline = "#ffa500";
           ramp-coreload-0 = "▁";
           ramp-coreload-0-font = 2;
           ramp-coreload-0-foreground = "#aaff77";
@@ -403,8 +445,20 @@ enable = true;
           type = "internal/memory";
           interval = 2;
           format = "<label>";
-          label = " %gb_used%";
-          label-font = 4;
+          label = "RAM %gb_used%";
+        };
+        "module/disk" = {
+          type = "internal/fs";
+          mount-0 = "/";
+          interval = 10;
+          fixed-values = true;
+          spacing = 2;
+          label-mounted = "%mountpoint% %free%";
+          format-mounted = "<label-mounted>";
+          format-mounted-underline = "#1245A8";
+          label-unmounted = "%mountpoint%: not mounted";
+          format-unmounted = "<label-unmounted>";
+          label-unmounted-foreground = "#55";
         };
         "module/battery" = {
           type = "internal/battery";
@@ -417,7 +471,6 @@ enable = true;
           format-discharging = "<ramp-capacity> <label-discharging>";
           format-discharging-underline = "#FF0000";
           format-full = "<ramp-capacity> <label-full>";
-          format-full-underline = "#00FF00";
 
           time-format = "%H:%M";
           label-charging = "%percentage%% %time%h";
@@ -459,42 +512,68 @@ enable = true;
           label-volume = "";
           label-volume-font = 4;
           format-volume = "<label-volume> <bar-volume>";
-          format-volume-underline = "#FF0000";
+          #format-volume-underline = "#FF0000";
 
           label-muted = "";
           label-muted-font = 4;
           format-muted = "<label-muted>";
-          format-muted-underline = "#FF0000";
+          #format-muted-underline = "#FF0000";
 
           bar-volume-width = 8;
           bar-volume-foreground-0 = "#aaff77";
           bar-volume-foreground-1 = "#aaff77";
           bar-volume-foreground-2 = "#fba922";
           bar-volume-foreground-3 = "#ff5555";
-          bar-volume-indicator = "|";
-          bar-volume-indicator-font = 6;
+          bar-volume-indicator = "%{A1:/home/tim/.nix-profile/bin/pavucontrol:}|%{A}";
+          bar-volume-indicator-font = 0;
           bar-volume-indicator-foreground = "#ffffff";
-          bar-volume-fill = "─";
-          bar-volume-fill-font = 6;
-          bar-volume-empty = "─";
-          bar-volume-empty-font = 6;
+          bar-volume-fill = "%{A1:/home/tim/.nix-profile/bin/pavucontrol:}─%{A}";
+          bar-volume-fill-font = 0;
+          bar-volume-empty = "%{A1:/home/tim/.nix-profile/bin/pavucontrol:}─%{A}";
+          bar-volume-empty-font = 0;
           bar-volume-empty-foreground = "#444444";
         };
         "module/date" = {
           type = "internal/date";
           interval = 5;
-          date = "%d.%m";
+          date = "%Y-%m-%d";
+          date-alt = "%A, %d %B %Y";
           time = "%H:%M";
-          label = "%date% %time%";
-          format-underline = "#0000FF";
+          time-alt = "%H:%M:%S";
+          label = "%date%  %time%";
+          #format-underline = "#0000FF";
         };
         "module/keyboard" = {
           type = "internal/xkeyboard";
           format = "<label-layout> <label-indicator>";
           label-indicator = "%name%";
         };
+        "module/temperature" = {
+          type = "internal/temperature";
+          interval = "0.5";
+          thermal-zone = 2;
+          hwmon-path = "/sys/devices/platform/coretemp.0/hwmon/hwmon2/temp1_input";
+          warn-temperature = 80;
+          units = true;
+          ramp-0 = "";
+          ramp-0-font = 3;
+          ramp-1 = "";
+          ramp-1-font = 3;
+          ramp-2 = "";
+          ramp-2-font = 3;
+          ramp-3 = "";
+          ramp-3-font = 3;
+          ramp-4 = "";
+          ramp-4-font = 3;
+          #ramp-foreground = "#55";
+          label = "%temperature-c%";
+          format = "<ramp> <label>";
+          label-warn = "%temperature-c%";
+          format-warn = "<ramp> <label-warn>";
+          label-warn-foreground = "#ff0000";
+        };
       };
-      script = "polybar top &";
+      script = "polybar top & polybar bottom &";
     };
 
     home.sessionVariables = {
@@ -706,7 +785,7 @@ enable = true;
             italic:
               family: Hack
               style: Italic
-            size: 18.0
+            size: 17.0
             offset:
               x: 0
               y: 0
