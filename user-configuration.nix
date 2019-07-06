@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ lib, pkgs, ... }:
 
 {
   users.mutableUsers = false;
@@ -55,6 +55,15 @@
 
   fonts.fontconfig.dpi = 168;
 
+  environment.etc."inputrc".text = lib.mkForce (
+    builtins.readFile <nixpkgs/nixos/modules/programs/bash/inputrc>
+    + ''
+      set editing-mode vi
+      "\e[5~": history-search-backward
+      "\e[6~": history-search-forward
+    ''
+  );
+
   home-manager.users.tim = {
 
     #fonts.fontconfig.enableProfileFonts = true;
@@ -66,15 +75,25 @@
     home.packages = with pkgs; [
 
       # cmdline
-      bundler
+      cmake
+      docker-compose
       exa
       fzf
+      gcc
+      gdrive
       gitAndTools.gitFull
       gnumake
       gnupg
-      go
+      godef
+      go-tools
+      gotools
+      hfsprogs
       jq
+      kind
+      kubectl
       libnotify
+      minikube
+      protobuf3_5
       ranger
       ruby
       tmux
@@ -85,11 +104,13 @@
       youtube-dl
 
       # python
-      python36Full
+      python37Full
       python3Packages.python-language-server
       python3Packages.pyls-mypy
       python3Packages.pyls-isort
       python3Packages.pyls-black
+      python3Packages.flake8
+      mypy
 
       # graphical
       alacritty
@@ -109,6 +130,32 @@
       wirelesstools
     ];
 
+    programs.bash = {
+      enable = true;
+      historySize = 100000;
+      historyFile = "$HOME/.bash_history";
+      historyFileSize = 1000000;
+      historyControl = [ "erasedups" "ignorespace" ];
+      historyIgnore = [ "cd" "exit" ];
+      sessionVariables = {};
+      shellAliases = {
+        ".." = "cd ..";
+        "ls" = "exa -HFgmB --group-directories-first --time-style=long-iso --git";
+        "ll" = "ls -l";
+        "la" = "ls -a";
+        "wd" = "j";
+      };
+      enableAutojump = true;
+      profileExtra = "";
+      bashrcExtra = "";
+      initExtra = "";
+    };
+
+    programs.fzf = {
+      enable = true;
+      defaultOptions = [];
+    };
+
     programs.chromium = {
       enable = true;
       extensions = [
@@ -123,6 +170,7 @@
     programs.man.enable = true;
 
     programs.go = {
+      package = pkgs.go_1_12;
       enable = true;
       goPath = "Code/go";
       goBin  = "Code/go/bin";
@@ -146,34 +194,32 @@
       configure = {
         packages.myVimPackage = with pkgs.vimPlugins; {
           start = [
-            vim-startify
             vim-sensible
-            vim-fugitive
-            vim-gitgutter
+            vim-signify
             vim-surround
             vim-colorschemes
+            vim-css-color
+            vim-commentary
             lightline-vim
-            vim-multiple-cursors
-            vim-eunuch
-            vim-polyglot
             fzf-vim
-            LanguageClient-neovim
-            deoplete-go
-            deoplete-jedi
+            vim-polyglot
+            echodoc-vim
+            vim-fugitive
+            vim-multiple-cursors
+            vim-autoformat
+            vim-go
+            #LanguageClient-neovim
+            #jedi-vim
+            #deoplete-jedi
+            coc-nvim
+            #ncm2
+            #ncm2-bufword
+            #ncm2-jedi
+            #ncm2-path
+            #ncm2-tmux
           ];
         };
         customRC = ''
-          let g:LanguageClient_serverCommands = {
-          \ 'python': ['pyls']
-          \ }
-          nnoremap <F5> :call LanguageClient_contextMenu()<CR>
-          nnoremap <silent> gh :call LanguageClient_textDocument_hover()<CR>
-          nnoremap <silent> gd :call LanguageClient_textDocument_definition()<CR>
-          nnoremap <silent> gr :call LanguageClient_textDocument_references()<CR>
-          nnoremap <silent> gs :call LanguageClient_textDocument_documentSymbol()<CR>
-          nnoremap <silent> <F2> :call LanguageClient_textDocument_rename()<CR>
-          nnoremap <silent> gf :call LanguageClient_textDocument_formatting()<CR>
-
           syntax on
           color smyck
           highlight Pmenu guibg=white guifg=black gui=bold
@@ -182,6 +228,8 @@
           highlight NonText guibg=none
 
           set mouse=a
+          set wrapscan
+          set smartcase
 
           set splitbelow
           set splitright
@@ -204,22 +252,154 @@
           set number
           set title
 
-          let mapleader = "\<Space>"
-          nmap <leader>t :NERDTreeToggle<CR>
-          nmap <leader>b :TagbarToggle<CR>
-          nmap <leader>r :so ~/.config/nvim/init.vim<CR>
-          nmap <leader>s <C-w>s<C-w>j:terminal<CR>
-          nmap <leader>vs <C-w>v<C-w>l:terminal<CR>
-          nmap <leader>f :Files<CR>
-          nmap <silent> <leader><leader> :noh<CR>
-          nmap <Tab> :bnext<CR>
-          nmap <S-Tab> :bprevious<CR>
+          " Change leader key from "\" to ";"
+          let mapleader=";"
 
-          nnoremap <leader>- <c-W>s
-          nnoremap <leader>/ <c-W>v
+          " Shortcut to edit THIS file: (e)dit (c)onfiguration
+          nnoremap <silent> <leader>ec :e $MYVIMRC<CR>
+
+          " Shortcut to source (reload) THIS file: (s)ource (c)onfig
+          nnoremap <silent> <leader>sc :source $MYVIMRC<CR>
+
+          " toggle line wrap
+          nnoremap <silent> <leader>w :set wrap! wrap?<CR>
+
+          " toggle buffer (switch between current and last buffer)
+          nnoremap <silent> <leader>bb <C-^>
+
+          " go to next buffer
+          nnoremap <silent> <leader>bn :bn<CR>
+          nnoremap <C-l> :bn<CR>
+
+          " go to previous buffer
+          nnoremap <silent> <leader>bp :bp<CR>
+          " https://github.com/neovim/neovim/issues/2048
+          nnoremap <C-h> :bp<CR>
+
+          " close buffer
+          nnoremap <silent> <leader>bd :bd<CR>
+
+          " kill buffer
+          nnoremap <silent> <leader>bk :bd!<CR>
+
+          " list buffers
+          nnoremap <silent> <leader>bl :ls<CR>
+          " list and select buffer
+          nnoremap <silent> <leader>bg :ls<CR>:buffer<Space>
+
+          " horizontal split with new buffer
+          nnoremap <silent> <leader>bh :new<CR>
+
+          " vertical split with new buffer
+          nnoremap <silent> <leader>bv :vnew<CR>
+                    
+          " improved keyboard navigation
+          nnoremap <leader>h <C-w>h
+          nnoremap <leader>j <C-w>j
+          nnoremap <leader>k <C-w>k
+          nnoremap <leader>l <C-w>l
 
           " Disable .swp already exists warning
           set shortmess+=A
+
+
+          " Markdown
+
+          au FileType markdown setlocal spell
+
+
+          " Programming languages
+
+          " Always draw the signcolumn.
+          set signcolumn=yes
+
+          " Display function signatures in echo area
+          set cmdheight=2
+          let g:echodoc#enable_at_startup = 1
+          let g:echodoc#type = 'signature'
+
+
+          " Python
+
+          autocmd Filetype python setlocal expandtab tabstop=4 shiftwidth=4 softtabstop=4
+
+          " Automatically start language servers.
+          let g:LanguageClient_autoStart = 1
+          let g:LanguageClient_signColumnAlwaysOn = 1
+          " let g:LanguageClient_loggingLevel = 'DEBUG'
+
+          let g:LanguageClient_serverCommands = {
+          \ 'python': ['pyls']
+          \ }
+
+          function SetLSPShortcuts()
+            nnoremap <leader>ld :call LanguageClient#textDocument_definition()<CR>
+            nnoremap <leader>lr :call LanguageClient#textDocument_rename()<CR>
+            nnoremap <leader>lf :call LanguageClient#textDocument_formatting()<CR>
+            nnoremap <leader>lt :call LanguageClient#textDocument_typeDefinition()<CR>
+            nnoremap <leader>lx :call LanguageClient#textDocument_references()<CR>
+            nnoremap <leader>la :call LanguageClient_workspace_applyEdit()<CR>
+            nnoremap <leader>lc :call LanguageClient#textDocument_completion()<CR>
+            nnoremap <leader>lh :call LanguageClient#textDocument_hover()<CR>
+            nnoremap <leader>ls :call LanguageClient_textDocument_documentSymbol()<CR>
+            nnoremap <leader>lm :call LanguageClient_contextMenu()<CR>
+ 
+          endfunction()
+
+          augroup LSP
+            autocmd!
+            autocmd FileType python call SetLSPShortcuts()
+          augroup END
+
+          autocmd BufEnter * call ncm2#enable_for_buffer()
+
+          " :help Ncm2PopupOpen for more information
+          set completeopt=noinsert,menuone,noselect
+
+          " Make it fast
+          let ncm2#complete_delay = 60
+          let ncm2#popup_delay = 60
+          let ncm2#complete_length = [[1, 1]]
+          " Use new fuzzy based matches
+          let g:ncm2#matcher = 'substrfuzzy'
+
+          set pumheight=5
+
+		  inoremap <expr> <Tab> pumvisible() ? "\<C-n>" : "\<Tab>"
+		  inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
+		  inoremap <silent> <expr> <CR> (pumvisible() && empty(v:completed_item)) ?  "\<c-y>\<cr>" : "\<CR>"
+
+          " Error and warning signs.
+          let g:ale_lint_on_enter = 0
+          let g:ale_lint_on_text_changed = 'never'
+          let g:ale_echo_msg_error_str = 'E'
+          let g:ale_echo_msg_warning_str = 'W'
+          let g:ale_echo_msg_format = '[%linter%] %s [%severity%]'
+          let g:ale_linters = {'python': ['flake8']}
+
+          let g:airline#extensions#ale#enabled = 1
+
+
+          " Golang
+
+          autocmd Filetype go setlocal noexpandtab tabstop=4 shiftwidth=4 softtabstop=4
+
+          let g:go_def_mode='gopls'
+          let g:go_info_mode='gopls'
+
+          let g:go_auto_sameids = 1
+          let g:go_fmt_command = "goimports"
+          let g:go_goimports_bin = "goimports -tabwidth=4"
+          let g:go_auto_type_info = 1
+
+          let g:go_highlight_build_constraints = 1
+          let g:go_highlight_extra_types = 1
+          let g:go_highlight_fields = 1
+          let g:go_highlight_functions = 1
+          let g:go_highlight_methods = 1
+          let g:go_highlight_operators = 1
+          let g:go_highlight_structs = 1
+          let g:go_highlight_types = 1
         '';
       };
     };
@@ -588,7 +768,14 @@ enable = true;
       windowManager.i3 = rec {
         package = pkgs.i3-gaps;
         enable = true;
+        extraConfig = ''
+          floating_minimum_size 500 x 300
+          floating_maximum_size 2000 x 1500
+          #for_window [class="(?i)chromium" instance="^(?!Navigator$)"] floating enable
+        '';
         config = {
+          workspaceLayout = "default";
+          assigns = {};
           startup = [
             {
               command      = "systemctl --user restart polybar";
@@ -623,6 +810,7 @@ enable = true;
             "${mod}+d"           = "exec i3-sensible-terminal -e ranger";
             "${mod}+p"           = "exec ${pkgs.dmenu}/bin/dmenu_run -i -l 20";
             "${mod}+b"           = "exec ${pkgs.chromium}/bin/chromium --incognito --force-device-scale-factor=1.5";
+            "${mod}+c"           = "exec ${pkgs.slack}/bin/slack --force-device-scale-factor=1.5";
             "${mod}+s"           = "exec ${pkgs.pavucontrol}/bin/pavucontrol &";
             "${mod}+Print"       = "exec ${pkgs.flameshot}/bin/flameshot gui";
 
@@ -734,6 +922,7 @@ enable = true;
       scriptPath = ".xsession-hm";
       profileExtra =
       ''
+        export GOROOT=$(go env GOROOT)
 	    xrdb -merge ~/.extend.Xresources
 	    bass source ~/.nix-profile/etc/profile.d/hm-session-vars.sh
       '';
