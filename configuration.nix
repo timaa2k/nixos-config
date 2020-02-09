@@ -9,7 +9,7 @@
     [
       ./hardware-configuration.nix
       ./user-configuration.nix
-      "${builtins.fetchTarball https://github.com/rycee/home-manager/archive/release-19.03.tar.gz}/nixos"
+      "${builtins.fetchTarball https://github.com/rycee/home-manager/archive/release-19.09.tar.gz}/nixos"
     ];
 
   boot = {
@@ -25,6 +25,7 @@
   networking = {
     hostName = "mbp";
     networkmanager.enable = true;
+    networkmanager.appendNameservers = [ "1.1.1.1" "8.8.8.8" ];
   };
 
   nixpkgs.config = {
@@ -57,6 +58,7 @@
     pciutils
     psmisc
     ripgrep
+    tmux
     tree
     usbutils
     utillinux
@@ -75,7 +77,7 @@
     tcpdump
 
     # connect
-    blueman
+    #blueman
     networkmanager
 
     # nixos
@@ -121,6 +123,8 @@
 
   virtualisation.docker.enable = true;
 
+  nixpkgs.config.pulseaudio = true;
+
   services = {
 
     logind.extraConfig = "HandlePowerKey=suspend";
@@ -135,12 +139,23 @@
 
       displayManager.sddm = {
         enable = true;
+        enableHidpi = true;
         #defaultUser = "tim";
         #autoLogin = false;
+        setupScript = ''
+          
+        '';
       };
 
       desktopManager = {
         plasma5.enable = true;
+        #default = "xfce";
+        #xterm.enable = false;
+        #xfce = {
+        #  enable = true;
+        #  noDesktop = true;
+        #  enableXfwm = false;
+        #};
         wallpaper.mode = "fill";
       };
 
@@ -149,6 +164,7 @@
         start = ''
           ${pkgs.stdenv.shell} $HOME/.xsession-hm &
           waitPID=$!
+          startkde
         '';
       }];
     };

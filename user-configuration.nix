@@ -39,7 +39,6 @@
     terminus_font
     ubuntu_font_family
   ];
-  fonts.fontconfig.ultimate.enable = true;
 
   fonts.fontconfig.defaultFonts = {
     monospace = [
@@ -53,7 +52,7 @@
     ];
   };
 
-  fonts.fontconfig.dpi = 168;
+  fonts.fontconfig.dpi = 192;
 
   environment.etc."inputrc".text = lib.mkForce (
     builtins.readFile <nixpkgs/nixos/modules/programs/bash/inputrc>
@@ -76,26 +75,30 @@
 
       # cmdline
       cmake
+      delve
       docker-compose
       exa
       fzf
       gcc
       gdrive
       gitAndTools.gitFull
+      gitAndTools.pre-commit
       gnumake
       gnupg
       godef
       go-tools
-      gotools
+      gparted
       hfsprogs
       jq
       kind
       kubectl
       libnotify
       minikube
-      protobuf3_5
       ranger
       ruby
+      shellcheck
+      tig
+      tmate
       tmux
       udisks
       unzip
@@ -140,10 +143,13 @@
       sessionVariables = {};
       shellAliases = {
         ".." = "cd ..";
-        "ls" = "exa -HFgmB --group-directories-first --time-style=long-iso --git";
+        "ls" = "exa -HFgmB --grid --group-directories-first --time-style=long-iso --git";
         "ll" = "ls -l";
         "la" = "ls -a";
         "wd" = "j";
+        "git-delete-merged" = ''
+          git branch --merged | egrep -v "(^\*|master|dev)" | xargs git branch -d
+        '';
       };
       enableAutojump = true;
       profileExtra = "";
@@ -164,6 +170,8 @@
         "dbepggeogbaibhgnhhndojpepiihcmeb" # Vimium
         "kgjfgplpablkjnlkjmjdecgdpfankdle" # Zoom Scheduler
         "fdpohaocaechififmbbbbbknoalclacl" # Full Page Screen Capture
+        "fhbjgbiflinjbdggehcddcbncdddomop" # Postman
+        "bcjindcccaagfpapjjmafapmmgkkhgoa" # JSON Formatter
       ];
     };
 
@@ -201,6 +209,7 @@
             vim-css-color
             vim-commentary
             lightline-vim
+            #vim-airline
             fzf-vim
             vim-polyglot
             echodoc-vim
@@ -209,12 +218,12 @@
             vim-autoformat
             vim-go
             #LanguageClient-neovim
-            #jedi-vim
+            jedi-vim
             #deoplete-jedi
-            coc-nvim
-            #ncm2
-            #ncm2-bufword
-            #ncm2-jedi
+            ale
+            ncm2
+            ncm2-bufword
+            ncm2-jedi
             #ncm2-path
             #ncm2-tmux
           ];
@@ -294,10 +303,10 @@
           nnoremap <silent> <leader>bv :vnew<CR>
                     
           " improved keyboard navigation
-          nnoremap <leader>h <C-w>h
-          nnoremap <leader>j <C-w>j
-          nnoremap <leader>k <C-w>k
-          nnoremap <leader>l <C-w>l
+          nnoremap <C-h> <C-w>h
+          nnoremap <C-j> <C-w>j
+          nnoremap <C-k> <C-w>k
+          nnoremap <C-l> <C-w>l
 
           " Disable .swp already exists warning
           set shortmess+=A
@@ -369,16 +378,48 @@
 		  inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
 		  inoremap <silent> <expr> <CR> (pumvisible() && empty(v:completed_item)) ?  "\<c-y>\<cr>" : "\<CR>"
 
-          " Error and warning signs.
-          let g:ale_lint_on_enter = 0
+          " ale options
+          let g:ale_echo_cursor = '1'
+
+          let g:ale_python_flake8_options = '--ignore=E129,E501,E302,E265,E241,E305,E402,W503'
+          let g:ale_python_pylint_options = '-j 0 --max-line-length=79'
+          let g:ale_list_window_size = 4
+          let g:ale_sign_column_always = 0
+          let g:ale_open_list = 0
+          let g:ale_keep_list_window_open = '0'
+          let g:ale_lint_on_enter = '0'
           let g:ale_lint_on_text_changed = 'never'
+          let g:ale_lint_on_save = '1'
+
+          let g:ale_sign_error = 'E'
+          let g:ale_sign_warning = 'W'
           let g:ale_echo_msg_error_str = 'E'
           let g:ale_echo_msg_warning_str = 'W'
+
           let g:ale_echo_msg_format = '[%linter%] %s [%severity%]'
-          let g:ale_linters = {'python': ['flake8']}
+          let g:ale_linters = {'python': ['flake8', 'mypy', 'pydocstyle', 'pyls']}
+          let g:ale_fixers = {'python': ['remove_trailing_lines', 'isort', 'yapf']}
+          "let g:airline#extensions#ale#enabled = 1
 
-          let g:airline#extensions#ale#enabled = 1
+          let g:jedi#auto_initialization = 1
+          let g:jedi#completions_enabled = 0
+          let g:jedi#auto_vim_configuration = 0
+          let g:jedi#smart_auto_mappings = 0
+          let g:jedi#popup_on_dot = 0
+          let g:jedi#completions_command = ""
+          let g:jedi#show_call_signatures = "1"
+          let g:jedi#show_call_signatures_delay = 0
+          let g:jedi#use_tabs_not_buffers = 0
+          let g:jedi#show_call_signatures_modes = 'i'  " ni = also in normal mode
+          let g:jedi#enable_speed_debugging=0
 
+          :au BufEnter * if &buftype == 'terminal' | :startinsert | endif
+          :tnoremap <Esc> <C-\><C-n>
+
+          tnoremap <C-w>h <C-\><C-n><C-w>h
+          tnoremap <C-w>j <C-\><C-n><C-w>j
+          tnoremap <C-w>k <C-\><C-n><C-w>k
+          tnoremap <C-w>l <C-\><C-n><C-w>l
 
           " Golang
 
@@ -407,7 +448,7 @@
     programs.command-not-found.enable = true;
 
     services = {
-      blueman-applet.enable = true;
+      #blueman-applet.enable = true;
       dunst.enable = true;
       flameshot.enable = true;
       network-manager-applet.enable = true;
@@ -421,7 +462,7 @@
     };
 
     services.gnome-keyring = {
-enable = true;
+      enable = true;
       components = [ "pkcs11" "secrets" "ssh" ];
     };
 
@@ -753,7 +794,8 @@ enable = true;
           label-warn-foreground = "#ff0000";
         };
       };
-      script = "polybar top & polybar bottom &";
+      #script = "polybar top & polybar bottom &";
+      script = "polybar top &";
     };
 
     home.sessionVariables = {
@@ -772,6 +814,11 @@ enable = true;
           floating_minimum_size 500 x 300
           floating_maximum_size 2000 x 1500
           #for_window [class="(?i)chromium" instance="^(?!Navigator$)"] floating enable
+          # Plasma settings
+          for_window [class="plasmashell"] floating enable
+          for_window [title="Desktop — Plasma"] kill, floating enable, border none
+          no_focus [class="plasmashell" window_type="notification"]
+          no_focus [class="plasmashell" window_type="on_screen_display"]
         '';
         config = {
           workspaceLayout = "default";
@@ -965,6 +1012,7 @@ enable = true;
           tabspaces: 4
 
           font:
+            size: 17
             normal:
               family: Hack
               style: Regular
@@ -974,7 +1022,6 @@ enable = true;
             italic:
               family: Hack
               style: Italic
-            size: 17.0
             offset:
               x: 0
               y: 0
@@ -982,7 +1029,7 @@ enable = true;
               x: 0
               y: 0
 
-          render_timer: false
+          debug.render_timer: false
           draw_bold_text_with_bright_colors: true
 
           colors:
